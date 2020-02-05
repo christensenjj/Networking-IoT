@@ -21,4 +21,4 @@ while True:
 	data_in = dict(d.split(": ", 1), for d in data.split("\r\n"))
 	if(data_in["operation"] == "acknowledge") :
 		# Respond to ACKNOWLEDGE message with RESPONSE
-		mydevice.sendto(capabilities ,addr)
+		mydevice.sendto(capabilities, addr)
