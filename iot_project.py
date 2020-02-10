@@ -16,13 +16,14 @@ mydevice.sendto(bytes(discover, 'utf-8'),('192.168.24.255', 4961))
 
 while True :
 	data, addr = mydevice.recvfrom(1024)
-	data = "operation: acknowledge\r\nname: name of controller\r\n"
 	data = data.decode('utf-8')
+	print(data)
 	# Split the response into a dictionary
 	data_split = data.split("\r\n")
 	data_split.pop()
 	data_in = dict(d.split(": ", 1) for d in data_split)
 	if(data_in["operation"] == "acknowledge") :
+		print("Sending Capabilities")
 		# Respond to ACKNOWLEDGE message with RESPONSE
-		mydevice.sendto(capabilities, addr)
+		mydevice.sendto(bytes(capabilities,'utf-8'), addr)
 
