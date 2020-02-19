@@ -9,8 +9,9 @@ import RPi.GPIO as GPIO
 import time
 
 discover = "operation: discover\r\n"
-capabilities = "operation: capabilities\r\nname: Jacob's Device\r\nresources: 2\r\n[resource 1]\r\ntype: switch\r\n[resource 2]\r\ntype: lamp\r\n"
+capabilities = "operation: capabilities\r\nname: jacob_pi\r\nresources: 2\r\n[resource 1]\r\ntype: switch\r\n[resource 2]\r\ntype: lamp\r\n"
 acknowledge = "operation: acknowledge\r\n"
+acknowledgement = "operation: acknowledgement\r\n"
 status_change_on = "operation: status change\r\ntype: switch 1\r\nstate: ON\r\n"
 status_change_off = "operation: status change\r\ntype: switch 1\r\nstate: OFF\r\n"
 status = 0
@@ -49,14 +50,13 @@ while True :
 	mydevice.settimeout(0.5)
 	mydevice.connect(addr)
 
-	while (data != 0):
+	while (data != -1):
 		try:
 			data = mydevice.recv(1024)
 		except socket.timeout:
-			data = -1
+			data = 0
 
-		if(data > 0):
-			print("Data Available")
+		if(data != 0):
 			data = data.decode('utf-8')
 			print(data)
 			# Split the response into a dictionary
@@ -70,9 +70,11 @@ while True :
 				else:
 					GPIO.output([6, 12, 13], GPIO.HIGH)
 				# Respond to STATUS CHANGE message with ACKNOWLEDGE
-				mydevice.send(bytes(acknowledge,'utf-8'))
+				data = mydevice.send(bytes(acknowledgement,'utf-8'))
+			if(data_in["operation"] == "acknowledgement"):
+				print ("Status Change Acknowledged by Controller")
 		if(GPIO.input(16) == GPIO.LOW) :
-			mydevice.send(bytes(status_change_on if status == 0 else status_change_off, 'utf-8'))
+			data = mydevice.send(bytes(status_change_on if status == 0 else status_change_off, 'utf-8'))
 			GPIO.output(4, GPIO.LOW if status == 0 else GPIO.HIGH)
 			status ^= 1
 			print("Switch toggled: ", status)
